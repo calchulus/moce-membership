@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<title>MOCE 会员卡 · Single-File Demo</title>
+<meta name="description" content="A functional PWA simulation of an Alipay mini-app 申请会员卡 (join membership) flow for MOCE Hardware." />
+<meta name="theme-color" content="#1677FF" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="MOCE会员" />
+<style>
+  :root{
+    --alipay:#1677FF; --alipay-d:#0E5FD8; --ink:#1A1A1A; --sub:#8A94A6;
+    --bg:#F2F4F7; --card:#fff; --line:#ECEFF3; --steel:#16212E; --orange:#FF7A18;
+    --ok:#00B578; --err:#FA5151; --radius:16px;
+    --sb-h:44px; --nav-h:48px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Helvetica,"Microsoft YaHei",sans-serif;
+    background:#0d1117; color:var(--ink);
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* phone shell */
+  .phone{
+    position:relative; width:100%; max-width:412px; height:100dvh; max-height:100dvh;
+    background:var(--bg); overflow:hidden; display:flex; flex-direction:column;
+    box-shadow:0 0 0 1px #222, 0 20px 60px rgba(0,0,0,.5);
+  }
+  @media(min-width:430px){ .phone{ height:880px; max-height:92vh; border-radius:38px; } body{padding:16px;} }
+
+  /* status bar */
+  .statusbar{height:var(--sb-h); flex:0 0 auto; background:var(--alipay); color:#fff;
+    display:flex; align-items:center; justify-content:space-between; padding:0 18px; font-size:14px; font-weight:600;}
+  .statusbar .right{display:flex; align-items:center; gap:6px;}
+  .statusbar svg{display:block;}
+
+  /* mini-app nav */
+  .navbar{height:var(--nav-h); flex:0 0 auto; background:var(--alipay); color:#fff;
+    display:flex; align-items:center; padding:0 12px; gap:8px; position:relative;}
+  .navbar .title{position:absolute; left:0; right:0; text-align:center; font-size:17px; font-weight:600; pointer-events:none;}
+  .nav-back{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;z-index:2;background:transparent;border:0;color:#fff;font-size:20px;cursor:pointer;}
+  .nav-back:active{background:rgba(255,255,255,.18);}
+  .capsule{margin-left:auto; z-index:2; display:flex; align-items:center; background:rgba(255,255,255,.22);
+    border:1px solid rgba(255,255,255,.35); border-radius:999px; height:30px; padding:0 4px; backdrop-filter:blur(4px);}
+  .capsule button{background:transparent;border:0;color:#fff;width:34px;height:100%;display:grid;place-items:center;cursor:pointer;font-size:15px;}
+  .capsule .dot{width:1px;height:16px;background:rgba(255,255,255,.4);}
+  .menu{position:absolute; top:calc(var(--nav-h) + 6px); right:10px; background:#3A3A3A; color:#fff; border-radius:10px; padding:6px; z-index:40; min-width:150px; box-shadow:0 8px 24px rgba(0,0,0,.35); display:none;}
+  .menu.open{display:block;}
+  .menu button{display:flex;width:100%;gap:8px;align-items:center;background:transparent;border:0;color:#fff;text-align:left;padding:9px 10px;border-radius:7px;font-size:14px;cursor:pointer;}
+  .menu button:active{background:rgba(255,255,255,.12);}
+
+  /* scroll body */
+  .body{flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative;}
+  .view{display:none; animation:fade .22s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .pad{padding:16px;}
+  .muted{color:var(--sub);}
+  .row{display:flex;align-items:center;gap:12px;}
+
+  /* brand header */
+  .brand{display:flex;align-items:center;gap:12px;padding:16px 16px 6px;}
+  .logo{width:48px;height:48px;border-radius:12px;background:var(--steel);color:var(--orange);display:grid;place-items:center;font-weight:800;font-size:24px;flex:0 0 auto;box-shadow:inset 0 -3px 0 rgba(255,122,24,.4);}
+  .brand h1{font-size:17px;margin:0;}
+  .brand .meta{font-size:12px;color:var(--sub);margin-top:3px;display:flex;gap:8px;align-items:center;}
+  .pill{font-size:11px;padding:1px 7px;border-radius:999px;background:#EAF2FF;color:var(--alipay);font-weight:600;}
+  .pill.ok{background:#E7F8F0;color:var(--ok);}
+
+  /* membership hero card */
+  .hero{margin:12px 16px;border-radius:20px;padding:20px;color:#fff;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#243447 0%,#16212E 55%,#0d1620 100%);box-shadow:0 12px 30px rgba(13,22,32,.35);}
+  .hero:after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,122,24,.55),transparent 60%);}
+  .hero .tier{font-size:12px;letter-spacing:2px;color:var(--orange);font-weight:700;}
+  .hero h2{margin:6px 0 2px;font-size:22px;}
+  .hero p{margin:0;font-size:12.5px;color:#B9C4D2;}
+  .hero .tiers{display:flex;gap:8px;margin-top:16px;position:relative;z-index:2;}
+  .hero .tiers span{font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);}
+  .hero .tiers span.on{background:var(--orange);border-color:var(--orange);color:#20140a;font-weight:700;}
+
+  .sec-title{font-size:15px;font-weight:700;margin:20px 16px 10px;display:flex;align-items:center;gap:8px;}
+  .sec-title:before{content:"";width:4px;height:15px;border-radius:2px;background:var(--orange);}
+
+  .card{background:var(--card);border-radius:var(--radius);margin:0 16px;padding:4px 16px;}
+  .benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:var(--radius);overflow:hidden;margin:0 16px;}
+  .benefit{background:#fff;padding:16px 8px;text-align:center;}
+  .benefit .ic{font-size:22px;}
+  .benefit .t{font-size:12.5px;font-weight:600;margin-top:6px;}
+  .benefit .d{font-size:10.5px;color:var(--sub);margin-top:2px;line-height:1.3;}
+
+  .gift{margin:14px 16px;border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;
+    background:linear-gradient(90deg,#FFF3E9,#FFE9D6);border:1px dashed #FFB877;}
+  .gift .g-ic{font-size:26px;}
+  .gift .g-t{font-size:14px;font-weight:700;color:#B4531A;}
+  .gift .g-d{font-size:12px;color:#C9762F;margin-top:2px;}
+
+  .listrow{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);}
+  .listrow:last-child{border-bottom:0;}
+  .listrow .li{font-size:19px;width:26px;text-align:center;}
+  .listrow .lt{font-size:14px;font-weight:600;}
+  .listrow .ld{font-size:11.5px;color:var(--sub);margin-top:2px;}
+  .listrow .chev{margin-left:auto;color:#C6CCD6;}
+
+  .spacer{height:96px;}
+
+  /* sticky bottom cta */
+  .cta-bar{position:absolute;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top,rgba(242,244,247,1) 60%,rgba(242,244,247,0));}
+  .btn{width:100%;height:48px;border:0;border-radius:999px;font-size:16px;font-weight:700;cursor:pointer;transition:.15s;}
+  .btn-primary{background:var(--alipay);color:#fff;box-shadow:0 8px 20px rgba(22,119,255,.32);}
+  .btn-primary:active{transform:scale(.985);background:var(--alipay-d);}
+  .btn-primary:disabled{background:#C3CBD6;box-shadow:none;cursor:not-allowed;}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .btn-ghost:active{background:#F3F5F8;}
+  .cta-note{text-align:center;font-size:11px;color:var(--sub);margin-top:8px;}
+
+  /* form */
+  .field{background:#fff;border-radius:var(--radius);margin:0 16px 12px;padding:2px 16px;}
+  .f-row{padding:13px 0;border-bottom:1px solid var(--line);}
+  .f-row:last-child{border-bottom:0;}
+  .f-row label{font-size:13px;color:var(--sub);display:block;margin-bottom:6px;}
+  .f-row input,.f-row select{width:100%;border:0;outline:0;font-size:16px;background:transparent;color:var(--ink);font-family:inherit;}
+  .f-row select{appearance:none;}
+  .f-err{font-size:11.5px;color:var(--err);margin-top:5px;display:none;}
+  .f-row.invalid input{color:var(--err);}
+  .f-row.invalid + .f-err,.f-err.show{display:block;}
+  .seg{display:flex;background:#F0F2F5;border-radius:10px;padding:3px;gap:3px;}
+  .seg button{flex:1;border:0;background:transparent;padding:9px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--sub);cursor:pointer;}
+  .seg button.on{background:#fff;color:var(--alipay);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .agree{display:flex;gap:9px;align-items:flex-start;margin:6px 16px 0;font-size:12.5px;color:var(--sub);line-height:1.5;}
+  .agree .box{width:19px;height:19px;border-radius:50%;border:1.6px solid #C6CCD6;flex:0 0 auto;margin-top:1px;display:grid;place-items:center;color:#fff;font-size:12px;cursor:pointer;}
+  .agree .box.on{background:var(--alipay);border-color:var(--alipay);}
+  .agree a{color:var(--alipay);text-decoration:none;}
+
+  /* bottom sheet (phone auth) */
+  .scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:.2s;z-index:50;}
+  .scrim.show{opacity:1;pointer-events:auto;}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;z-index:60;
+    transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);padding:20px 20px calc(20px + env(safe-area-inset-bottom));}
+  .sheet.show{transform:none;}
+  .sheet .grab{width:38px;height:4px;border-radius:2px;background:#E3E7ED;margin:0 auto 16px;}
+  .auth-head{display:flex;gap:12px;align-items:center;}
+  .auth-head .logo{width:44px;height:44px;font-size:22px;}
+  .auth-head .t{font-size:16px;font-weight:700;}
+  .auth-head .s{font-size:12px;color:var(--sub);margin-top:2px;}
+  .auth-body{margin:16px 0;padding:14px;background:#F7F9FC;border-radius:12px;font-size:13.5px;color:#5A6473;line-height:1.6;}
+  .auth-phone{text-align:center;margin:8px 0 4px;}
+  .auth-phone .num{font-size:26px;font-weight:700;letter-spacing:1px;}
+  .auth-phone .lb{font-size:12px;color:var(--sub);margin-top:4px;}
+  .sheet .btns{display:flex;gap:12px;margin-top:18px;}
+  .sheet .fineprint{font-size:11px;color:#A7B0BE;text-align:center;margin-top:12px;line-height:1.5;}
+
+  /* success */
+  .succ-top{text-align:center;padding:22px 16px 6px;}
+  .check{width:58px;height:58px;border-radius:50%;background:var(--ok);color:#fff;font-size:30px;display:grid;place-items:center;margin:0 auto;box-shadow:0 8px 20px rgba(0,181,120,.35);animation:pop .4s cubic-bezier(.2,1.4,.4,1);}
+  @keyframes pop{from{transform:scale(.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .succ-top h2{margin:12px 0 4px;font-size:19px;}
+  .succ-top p{margin:0;font-size:13px;color:var(--sub);}
+
+  .mcard{margin:16px;border-radius:20px;padding:18px;color:#fff;position:relative;overflow:hidden;
+    background:linear-gradient(135deg,#2A3B4F,#16212E 60%,#0c141d);}
+  .mcard:after{content:"";position:absolute;left:-30px;bottom:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,122,24,.4),transparent 60%);}
+  .mcard .mh{display:flex;align-items:center;gap:10px;position:relative;z-index:2;}
+  .mcard .mh .logo{width:34px;height:34px;font-size:17px;border-radius:9px;}
+  .mcard .mh .nm{font-size:14px;font-weight:700;}
+  .mcard .mh .tier{margin-left:auto;font-size:11px;background:var(--orange);color:#20140a;padding:3px 9px;border-radius:999px;font-weight:700;}
+  .mcard .who{margin-top:16px;position:relative;z-index:2;}
+  .mcard .who .n{font-size:18px;font-weight:700;}
+  .mcard .who .no{font-size:12px;color:#AEB9C6;margin-top:4px;letter-spacing:1px;}
+  .mcard .qrwrap{margin-top:16px;background:#fff;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;position:relative;z-index:2;}
+  .mcard canvas{border-radius:6px;display:block;}
+  .mcard .qrtxt{font-size:11px;color:#5A6473;line-height:1.5;}
+  .mcard .qrtxt b{color:var(--ink);font-size:12px;}
+
+  .stat-grid{display:flex;gap:1px;background:var(--line);border-radius:var(--radius);overflow:hidden;margin:0 16px 14px;}
+  .stat{flex:1;background:#fff;padding:14px 8px;text-align:center;}
+  .stat .v{font-size:19px;font-weight:800;color:var(--alipay);}
+  .stat .v.orange{color:var(--orange);}
+  .stat .l{font-size:11px;color:var(--sub);margin-top:3px;}
+
+  .coupon{margin:0 16px 12px;border-radius:14px;overflow:hidden;display:flex;border:1px solid #FFE0C2;}
+  .coupon .amt{background:linear-gradient(135deg,#FF8A2B,#FF6A00);color:#fff;padding:14px 16px;display:grid;place-items:center;min-width:96px;text-align:center;}
+  .coupon .amt .big{font-size:24px;font-weight:800;line-height:1;}
+  .coupon .amt .sm{font-size:10px;margin-top:3px;opacity:.9;}
+  .coupon .info{flex:1;background:#FFF7F0;padding:12px 14px;}
+  .coupon .info .t{font-size:13.5px;font-weight:700;color:#8a4a17;}
+  .coupon .info .d{font-size:11px;color:#B5825A;margin-top:3px;}
+  .coupon .info .use{margin-top:8px;font-size:12px;color:#fff;background:var(--orange);border:0;padding:5px 14px;border-radius:999px;font-weight:600;cursor:pointer;}
+
+  .prog{margin:0 16px 14px;background:#fff;border-radius:var(--radius);padding:14px 16px;}
+  .prog .ph{display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;}
+  .prog .bar{height:8px;border-radius:4px;background:#EEF1F5;overflow:hidden;}
+  .prog .bar i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--orange),#FFB067);border-radius:4px;}
+
+  .btnrow{display:flex;gap:12px;margin:0 16px;}
+  .btnrow .btn{height:46px;font-size:15px;}
+
+  /* toast */
+  .toast{position:absolute;left:50%;bottom:120px;transform:translate(-50%,20px);background:rgba(30,34,40,.94);color:#fff;
+    padding:11px 18px;border-radius:12px;font-size:13.5px;z-index:80;opacity:0;pointer-events:none;transition:.25s;max-width:80%;text-align:center;}
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  /* processing overlay */
+  .proc{position:absolute;inset:0;background:rgba(255,255,255,.72);backdrop-filter:blur(2px);z-index:70;display:none;place-items:center;}
+  .proc.show{display:grid;}
+  .proc .box{background:rgba(30,34,40,.92);color:#fff;border-radius:16px;padding:26px 30px;text-align:center;}
+  .spin{width:38px;height:38px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;margin:0 auto 12px;animation:sp .8s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .proc .box p{margin:0;font-size:13.5px;}
+
+  .home-ind{height:6px;flex:0 0 auto;display:grid;place-items:center;background:transparent;}
+  .home-ind i{width:120px;height:5px;border-radius:3px;background:#00000022;display:block;}
+  .terms{font-size:12.5px;color:#5A6473;line-height:1.7;}
+  .terms h4{color:var(--ink);margin:14px 0 6px;}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- status bar -->
+  <div class="statusbar">
+    <span id="clock">9:41</span>
+    <span class="right">
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="6" width="3" height="6" rx="1"/><rect x="9" y="3.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="1" width="3" height="11" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#fff" stroke-width="1.4"><path d="M1 4.2a10 10 0 0 1 14 0M3.4 6.8a6.6 6.6 0 0 1 9.2 0M5.8 9.3a3.2 3.2 0 0 1 4.4 0"/><circle cx="8" cy="11" r=".6" fill="#fff" stroke="none"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="1.6" fill="#fff"/><rect x="23" y="4" width="1.6" height="4" rx="1" fill="#fff" fill-opacity=".6"/></svg>
+    </span>
+  </div>
+
+  <!-- mini-app navbar -->
+  <div class="navbar">
+    <button class="nav-back" id="navBack" aria-label="back">‹</button>
+    <div class="title" id="navTitle">MOCE 会员</div>
+    <div class="capsule">
+      <button id="capMore" aria-label="more">•••</button>
+      <span class="dot"></span>
+      <button id="capHome" aria-label="close">◎</button>
+    </div>
+    <div class="menu" id="menu">
+      <button data-act="reset">↺ 重新演示</button>
+      <button data-act="terms">📄 会员服务协议</button>
+      <button data-act="about">ℹ️ 关于此 Demo</button>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div class="body" id="body">
+
+    <!-- ===================== LANDING ===================== -->
+    <section class="view active" id="v-landing">
+      <div class="brand">
+        <div class="logo">M</div>
+        <div>
+          <h1>MOCE 五金 <span class="muted" style="font-weight:500;font-size:13px;">Hardware</span></h1>
+          <div class="meta"><span class="pill ok">营业中</span> 南山旗舰店 · 4.9分 · 12家门店</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="tier">MOCE MEMBERSHIP</div>
+        <h2>MOCE 会员卡</h2>
+        <p>工具 · 建材 · 五金耗材 — 会员专享价与积分回馈</p>
+        <div class="tiers">
+          <span class="on">银卡</span><span>金卡</span><span>黑卡</span><span>工程采购</span>
+        </div>
+      </div>
+
+      <div class="gift">
+        <div class="g-ic">🎁</div>
+        <div>
+          <div class="g-t">开卡礼：¥50 工具券 + 500 积分</div>
+          <div class="g-d">新会员首次申请即得，可在门店或线上核销</div>
+        </div>
+      </div>
+
+      <div class="sec-title">会员权益</div>
+      <div class="benefits">
+        <div class="benefit"><div class="ic">🪙</div><div class="t">积分回馈</div><div class="d">每消费¥1得1分</div></div>
+        <div class="benefit"><div class="ic">🏷️</div><div class="t">会员折扣</div><div class="d">工具低至9折</div></div>
+        <div class="benefit"><div class="ic">🎂</div><div class="t">生日礼券</div><div class="d">生日月双倍券</div></div>
+        <div class="benefit"><div class="ic">🚚</div><div class="t">免费配送</div><div class="d">满¥299免运费</div></div>
+        <div class="benefit"><div class="ic">♻️</div><div class="t">以旧换新</div><div class="d">旧工具折现金</div></div>
+        <div class="benefit"><div class="ic">🧰</div><div class="t">工程采购</div><div class="d">大宗专属报价</div></div>
+      </div>
+
+      <div class="sec-title">门店与服务</div>
+      <div class="card">
+        <div class="listrow"><div class="li">📍</div><div><div class="lt">南山旗舰店</div><div class="ld">深圳市南山区科技园 · 距您 1.2km</div></div><div class="chev">›</div></div>
+        <div class="listrow"><div class="li">🧾</div><div><div class="lt">电子发票</div><div class="ld">会员消费自动开具增值税发票</div></div><div class="chev">›</div></div>
+        <div class="listrow"><div class="li">💬</div><div><div class="lt">专属客服</div><div class="ld">选型咨询 · 报价 · 售后</div></div><div class="chev">›</div></div>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="cta-bar">
+        <button class="btn btn-primary" id="btnApply">立即申请会员卡</button>
+        <div class="cta-note">已有 <b style="color:var(--alipay)">128,650</b> 位用户加入 MOCE 会员</div>
+      </div>
+    </section>
+
+    <!-- ===================== FORM ===================== -->
+    <section class="view" id="v-form">
+      <div class="pad" style="padding-bottom:4px;">
+        <div style="font-size:19px;font-weight:700;">填写会员资料</div>
+        <div class="muted" style="font-size:12.5px;margin-top:5px;">手机号已通过支付宝授权，请补充以下信息完成开卡</div>
+      </div>
+
+      <div class="field" style="margin-top:14px;">
+        <div class="f-row" id="r-name">
+          <label>姓名 / 称呼 *</label>
+          <input id="f-name" type="text" placeholder="请输入真实姓名" autocomplete="name" />
+        </div>
+        <div class="f-err" id="e-name">请输入至少 2 个字符的姓名</div>
+
+        <div class="f-row" id="r-phone">
+          <label>手机号 *</label>
+          <input id="f-phone" type="tel" inputmode="numeric" maxlength="11" placeholder="用于接收会员通知" />
+        </div>
+        <div class="f-err" id="e-phone">请输入有效的中国大陆手机号</div>
+
+        <div class="f-row">
+          <label>会员类型</label>
+          <div class="seg" id="f-type" style="margin-top:2px;">
+            <button data-v="个人 DIY" class="on">个人 DIY</button>
+            <button data-v="企业采购">企业 / 工程采购</button>
+          </div>
+        </div>
+
+        <div class="f-row">
+          <label>生日（选填，领取生日礼券）</label>
+          <input id="f-bday" type="date" />
+        </div>
+
+        <div class="f-row">
+          <label>常驻门店</label>
+          <select id="f-store">
+            <option>南山旗舰店</option><option>福田中心店</option><option>宝安建材城店</option><option>线上商城</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="agree" id="agreeRow">
+        <div class="box" id="agreeBox">✓</div>
+        <div>我已阅读并同意 <a id="lnkTerms" href="#">《MOCE 会员服务协议》</a> 与 <a href="#" id="lnkPriv">《隐私政策》</a>，并授权 MOCE 使用我的手机号创建会员账户。</div>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="cta-bar">
+        <button class="btn btn-primary" id="btnSubmit" disabled>立即开卡</button>
+        <div class="cta-note">开卡即享 ¥50 工具券 + 500 积分</div>
+      </div>
+    </section>
+
+    <!-- ===================== SUCCESS / CARD ===================== -->
+    <section class="view" id="v-success">
+      <div class="succ-top">
+        <div class="check">✓</div>
+        <h2>会员卡开通成功</h2>
+        <p id="succSub">欢迎加入 MOCE 会员，开卡礼已发放至账户</p>
+      </div>
+
+      <div class="mcard">
+        <div class="mh">
+          <div class="logo">M</div>
+          <div class="nm">MOCE 五金会员卡</div>
+          <div class="tier" id="cTier">银卡会员</div>
+        </div>
+        <div class="who">
+          <div class="n" id="cName">—</div>
+          <div class="no" id="cNo">会员卡号 —</div>
+        </div>
+        <div class="qrwrap">
+          <canvas id="qr" width="96" height="96"></canvas>
+          <div class="qrtxt">
+            <b>出示会员码</b><br/>门店收银台扫码享会员价<br/><span class="muted" id="cBarcode">MOCE · —</span>
+            <canvas id="bc" width="150" height="34" style="margin-top:8px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat"><div class="v orange" id="sPoints">500</div><div class="l">可用积分</div></div>
+        <div class="stat"><div class="v">¥50</div><div class="l">工具券</div></div>
+        <div class="stat"><div class="v">9折</div><div class="l">会员折扣</div></div>
+      </div>
+
+      <div class="coupon">
+        <div class="amt"><div><div class="big">¥50</div><div class="sm">满¥199可用</div></div></div>
+        <div class="info">
+          <div class="t">开卡礼 · 工具品类券</div>
+          <div class="d">有效期至 <span id="cpExp">—</span> · 门店/线上通用</div>
+          <button class="use" id="btnUse">去使用</button>
+        </div>
+      </div>
+
+      <div class="prog">
+        <div class="ph"><span>银卡会员</span><span class="muted">再消费 ¥2,000 升级金卡</span></div>
+        <div class="bar"><i></i></div>
+      </div>
+
+      <div class="btnrow" style="margin-bottom:12px;">
+        <button class="btn btn-primary" id="btnAddCard">添加到卡包</button>
+        <button class="btn btn-ghost" id="btnBenefits">查看权益</button>
+      </div>
+      <div class="spacer" style="height:20px;"></div>
+    </section>
+
+    <!-- ===================== BENEFITS DETAIL ===================== -->
+    <section class="view" id="v-benefits">
+      <div class="pad"><div style="font-size:19px;font-weight:700;">会员权益详情</div></div>
+      <div class="card">
+        <div class="listrow"><div class="li">🪙</div><div><div class="lt">积分回馈</div><div class="ld">每消费 ¥1 累积 1 积分，1000 积分抵 ¥50</div></div></div>
+        <div class="listrow"><div class="li">🏷️</div><div><div class="lt">会员折扣</div><div class="ld">手动工具 9 折、电动工具 95 折</div></div></div>
+        <div class="listrow"><div class="li">🎂</div><div><div class="lt">生日礼券</div><div class="ld">生日当月赠送双倍积分与专属券</div></div></div>
+        <div class="listrow"><div class="li">🚚</div><div><div class="lt">免费配送</div><div class="ld">订单满 ¥299 免运费（含建材大件）</div></div></div>
+        <div class="listrow"><div class="li">♻️</div><div><div class="lt">以旧换新</div><div class="ld">旧电动工具回收抵扣新机</div></div></div>
+        <div class="listrow"><div class="li">🧰</div><div><div class="lt">工程采购</div><div class="ld">大宗订单专属报价 + 账期支持</div></div></div>
+      </div>
+      <div class="spacer" style="height:24px;"></div>
+    </section>
+
+    <!-- ===================== TERMS ===================== -->
+    <section class="view" id="v-terms">
+      <div class="pad terms">
+        <div style="font-size:19px;font-weight:700;color:var(--ink);">MOCE 会员服务协议</div>
+        <h4>一、会员资格</h4>
+        <p>凡通过支付宝小程序授权手机号并填写真实信息者，均可免费申请成为 MOCE 会员。会员卡仅限本人使用，不得转借、买卖。</p>
+        <h4>二、积分与权益</h4>
+        <p>会员每消费 ¥1 累积 1 积分，积分可在门店或线上商城兑换商品及抵扣现金。生日礼券、免费配送等权益以门店公示为准，MOCE 保留调整权益的权利。</p>
+        <h4>三、隐私保护</h4>
+        <p>本 Demo 为界面模拟，不会上传或存储任何真实个人信息；所有数据仅保存在您本机浏览器 localStorage 中。</p>
+        <h4>四、说明</h4>
+        <p>本页面为 <b>Alipay 小程序「申请会员卡」流程的高保真模拟</b>，用于产品演示与交互评审，非真实支付宝页面，不产生任何真实开卡行为。</p>
+      </div>
+      <div class="spacer" style="height:24px;"></div>
+    </section>
+
+  </div><!-- /body -->
+
+  <!-- phone auth bottom sheet -->
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="authSheet" role="dialog" aria-modal="true">
+    <div class="grab"></div>
+    <div class="auth-head">
+      <div class="logo">M</div>
+      <div>
+        <div class="t">MOCE 五金 申请</div>
+        <div class="s">获取并验证你的支付宝绑定手机号</div>
+      </div>
+    </div>
+    <div class="auth-phone">
+      <div class="num" id="authNum">138 **** 8000</div>
+      <div class="lb">支付宝绑定手机号</div>
+    </div>
+    <div class="auth-body">
+      授权后，MOCE 将使用该手机号为你创建会员账户，并发送开卡通知与会员权益信息。你可在「支付宝-卡包」中管理。
+    </div>
+    <div class="btns">
+      <button class="btn btn-ghost" id="authDeny">拒绝</button>
+      <button class="btn btn-primary" id="authAllow">允许</button>
+    </div>
+    <div class="fineprint">模拟 my.getAuthCode + 手机号快速验证组件<br/>真实小程序中此授权由支付宝原生弹窗完成</div>
+  </div>
+
+  <!-- processing -->
+  <div class="proc" id="proc"><div class="box"><div class="spin"></div><p>正在为你开通会员卡…</p></div></div>
+
+  <!-- toast -->
+  <div class="toast" id="toast"></div>
+
+  <div class="home-ind"><i></i></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var views = {landing:'v-landing', form:'v-form', success:'v-success', benefits:'v-benefits', terms:'v-terms'};
+  var titles = {landing:'MOCE 会员', form:'申请会员卡', success:'我的会员卡', benefits:'会员权益', terms:'会员服务协议'};
+  var order = ['landing','form','success'];
+  var hist = ['landing'];
+  var current = 'landing';
+  var store = {
+    key:'moce_member_v1',
+    get:function(){ try{ return JSON.parse(localStorage.getItem(this.key)); }catch(e){ return null; } },
+    set:function(m){ try{ localStorage.setItem(this.key, JSON.stringify(m)); }catch(e){} },
+    clear:function(){ try{ localStorage.removeItem(this.key); }catch(e){} }
+  };
+  var form = { name:'', phone:'', type:'个人 DIY', bday:'', store:'南山旗舰店', agreed:false };
+  var BOUND_PHONE = '13800008000';
+
+  // ---- clock ----
+  function tick(){
+    var d=new Date(), h=d.getHours(), m=d.getMinutes();
+    $('clock').textContent = h+':'+(m<10?'0'+m:m);
+  }
+  tick(); setInterval(tick, 15000);
+
+  // ---- navigation ----
+  function show(name, push){
+    Object.keys(views).forEach(function(k){ $(views[k]).classList.toggle('active', k===name); });
+    current = name;
+    $('navTitle').textContent = titles[name] || 'MOCE 会员';
+    $('body').scrollTop = 0;
+    $('navBack').style.visibility = (name==='landing') ? 'hidden' : 'visible';
+    if(push!==false){ if(hist[hist.length-1]!==name) hist.push(name); }
+  }
+  function back(){
+    if(hist.length>1){ hist.pop(); show(hist[hist.length-1], false); }
+    else show('landing', false);
+  }
+  $('navBack').addEventListener('click', back);
+
+  // ---- toast ----
+  var tT;
+  function toast(msg){
+    var t=$('toast'); t.textContent=msg; t.classList.add('show');
+    clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('show'); }, 2000);
+  }
+
+  // ---- capsule menu ----
+  $('capMore').addEventListener('click', function(e){ e.stopPropagation(); $('menu').classList.toggle('open'); });
+  document.addEventListener('click', function(){ $('menu').classList.remove('open'); });
+  $('capHome').addEventListener('click', function(){ toast('（模拟）返回支付宝小程序列表'); });
+  $('menu').addEventListener('click', function(e){
+    var b=e.target.closest('button'); if(!b) return; var a=b.getAttribute('data-act');
+    $('menu').classList.remove('open');
+    if(a==='reset'){ store.clear(); resetForm(); show('landing'); hist=['landing']; toast('演示已重置'); }
+    if(a==='terms'){ show('terms'); }
+    if(a==='about'){ toast('MOCE 会员卡 · Alipay 小程序流程模拟 PWA'); }
+  });
+
+  // ---- landing -> auth sheet ----
+  var sheet=$('authSheet'), scrim=$('scrim');
+  function openSheet(){ sheet.classList.add('show'); scrim.classList.add('show'); }
+  function closeSheet(){ sheet.classList.remove('show'); scrim.classList.remove('show'); }
+  $('btnApply').addEventListener('click', openSheet);
+  scrim.addEventListener('click', closeSheet);
+  $('authDeny').addEventListener('click', function(){ closeSheet(); toast('需授权手机号才能开卡'); });
+  $('authAllow').addEventListener('click', function(){
+    closeSheet();
+    form.phone = BOUND_PHONE;
+    $('f-phone').value = BOUND_PHONE;
+    validate();
+    setTimeout(function(){ show('form'); }, 200);
+    toast('手机号授权成功');
+  });
+
+  // ---- form ----
+  function maskPhone(p){ return p.length>=7 ? p.slice(0,3)+' **** '+p.slice(-4) : p; }
+  $('authNum').textContent = maskPhone(BOUND_PHONE);
+
+  $('f-type').addEventListener('click', function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    Array.prototype.forEach.call(this.children, function(c){ c.classList.remove('on'); });
+    b.classList.add('on'); form.type=b.getAttribute('data-v');
+  });
+  $('f-name').addEventListener('input', function(){ form.name=this.value.trim(); validate(); });
+  $('f-phone').addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,11); form.phone=this.value; validate(); });
+  $('f-bday').addEventListener('change', function(){ form.bday=this.value; });
+  $('f-store').addEventListener('change', function(){ form.store=this.value; });
+  $('agreeBox').addEventListener('click', function(){ form.agreed=!form.agreed; this.classList.toggle('on', form.agreed); validate(); });
+  $('lnkTerms').addEventListener('click', function(e){ e.preventDefault(); show('terms'); });
+  $('lnkPriv').addEventListener('click', function(e){ e.preventDefault(); show('terms'); });
+
+  function validate(silent){
+    var nameOk = form.name.length>=2;
+    var phoneOk = /^1[3-9]\d{9}$/.test(form.phone);
+    if(!silent){
+      $('r-name').classList.toggle('invalid', $('f-name').value.length>0 && !nameOk);
+      $('e-name').classList.toggle('show', $('f-name').value.length>0 && !nameOk);
+      $('r-phone').classList.toggle('invalid', $('f-phone').value.length>0 && !phoneOk);
+      $('e-phone').classList.toggle('show', $('f-phone').value.length>0 && !phoneOk);
+    }
+    $('btnSubmit').disabled = !(nameOk && phoneOk && form.agreed);
+    return nameOk && phoneOk && form.agreed;
+  }
+
+  $('btnSubmit').addEventListener('click', function(){
+    if(!validate()) { toast('请完善资料并勾选协议'); return; }
+    $('proc').classList.add('show');
+    setTimeout(function(){
+      var m = issueCard();
+      $('proc').classList.remove('show');
+      renderCard(m);
+      show('success');
+    }, 1000);
+  });
+
+  // ---- issue ----
+  function rnd(seed){ // deterministic PRNG from string
+    var h=2166136261; for(var i=0;i<seed.length;i++){ h^=seed.charCodeAt(i); h=Math.imul(h,16777619); }
+    return function(){ h+=0x6D2B79F5; var t=h; t=Math.imul(t^t>>>15, t|1); t^=t+Math.imul(t^t>>>7, t|61); return ((t^t>>>14)>>>0)/4294967296; };
+  }
+  function issueCard(){
+    var r=Math.random;
+    var no='MOCE-'+String(new Date().getFullYear())+'-'+(''+Math.floor(100000+r()*899999));
+    var m={
+      name:form.name, phone:form.phone, type:form.type, bday:form.bday, store:form.store,
+      no:no, tier:'银卡会员', points:500, coupon:'¥50', issued:new Date().toISOString()
+    };
+    store.set(m);
+    return m;
+  }
+  function fmtExp(){
+    var d=new Date(); d.setDate(d.getDate()+30);
+    return (d.getMonth()+1)+'月'+d.getDate()+'日';
+  }
+  function renderCard(m){
+    $('cName').textContent = m.name + (m.type==='企业采购' ? ' · 企业会员' : '');
+    $('cNo').textContent = '会员卡号 ' + m.no;
+    $('cTier').textContent = m.tier;
+    $('sPoints').textContent = m.points;
+    $('cpExp').textContent = fmtExp();
+    $('cBarcode').textContent = 'MOCE · ' + m.no.replace('MOCE-','');
+    $('succSub').textContent = '欢迎加入 MOCE 会员，'+m.name+'！开卡礼已发放';
+    drawQR($('qr'), m.no);
+    drawBarcode($('bc'), m.no);
+  }
+
+  // ---- mock QR (deterministic, decorative) ----
+  function drawQR(cv, seed){
+    var ctx=cv.getContext('2d'), N=25, s=cv.width/N, R=rnd(seed);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#16212E';
+    function finder(x,y){ ctx.fillRect(x*s,y*s,7*s,7*s); ctx.fillStyle='#fff'; ctx.fillRect((x+1)*s,(y+1)*s,5*s,5*s); ctx.fillStyle='#16212E'; ctx.fillRect((x+2)*s,(y+2)*s,3*s,3*s); }
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+      var inFinder=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);
+      if(inFinder) continue;
+      if(R()>0.52) ctx.fillRect(x*s,y*s,s,s);
+    }
+    finder(0,0); finder(N-7,0); finder(0,N-7);
+    // center logo
+    var c=cv.width/2, b=5*s;
+    ctx.fillStyle='#fff'; ctx.fillRect(c-b/2-2,c-b/2-2,b+4,b+4);
+    ctx.fillStyle='#16212E'; ctx.fillRect(c-b/2,c-b/2,b,b);
+    ctx.fillStyle='#FF7A18'; ctx.font='700 '+(b*0.62)+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('M', c, c+1);
+  }
+  function drawBarcode(cv, seed){
+    var ctx=cv.getContext('2d'), R=rnd(seed);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#16212E'; var x=2;
+    while(x<cv.width-2){ var w=1+Math.floor(R()*3); if(R()>0.45) ctx.fillRect(x,2,w,cv.height-4); x+=w+1+Math.floor(R()*2); }
+  }
+
+  // ---- success actions ----
+  $('btnAddCard').addEventListener('click', function(){ toast('（模拟）已添加到支付宝卡包 · my.addCardAuth'); });
+  $('btnBenefits').addEventListener('click', function(){ show('benefits'); });
+  $('btnUse').addEventListener('click', function(){ toast('¥50 工具券已放入卡包，结算时自动抵扣'); });
+
+  // ---- reset ----
+  function resetForm(){
+    form={ name:'', phone:'', type:'个人 DIY', bday:'', store:'南山旗舰店', agreed:false };
+    $('f-name').value=''; $('f-phone').value=''; $('f-bday').value=''; $('f-store').selectedIndex=0;
+    $('agreeBox').classList.remove('on');
+    Array.prototype.forEach.call($('f-type').children,function(c,i){ c.classList.toggle('on', i===0); });
+    ['r-name','r-phone'].forEach(function(id){ $(id).classList.remove('invalid'); });
+    ['e-name','e-phone'].forEach(function(id){ $(id).classList.remove('show'); });
+    $('btnSubmit').disabled=true;
+  }
+
+  // ---- restore session ----
+  var existing = store.get();
+  if(existing){
+    // prefill nothing on landing, but offer quick access
+    $('btnApply').textContent = '查看我的会员卡';
+    $('btnApply').onclick = function(){ renderCard(existing); show('success'); };
+  }
+
+})();
+</script>
+</body>
+</html>
