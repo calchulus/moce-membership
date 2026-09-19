@@ -508,6 +508,7 @@
     $('navBack').style.visibility = (name==='landing') ? 'hidden' : 'visible';
     $('ctaLanding').style.display = (name==='landing') ? '' : 'none';
     $('ctaForm').style.display = (name==='form') ? '' : 'none';
+    if(name==='form' && !form.name){ autofill(); toast('已为你预填示例资料，可直接开卡'); }
     if(push!==false){ if(hist[hist.length-1]!==name) hist.push(name); }
   }
   function back(){
@@ -575,8 +576,8 @@
     Array.prototype.forEach.call($('f-type').children, function(c,i){ c.classList.toggle('on', i===index); });
   }
 
-  // ---- one-tap autofill (demo convenience) ----
-  $('btnAutofill').addEventListener('click', function(){
+  // ---- autofill (demo convenience); also runs automatically on first form entry ----
+  function autofill(){
     form.name='张伟'; form.phone=BOUND_PHONE; form.type='个人创客';
     form.bday='1992-08-18'; form.agreed=true;
     $('f-name').value='张伟'; $('f-phone').value=BOUND_PHONE;
@@ -585,8 +586,8 @@
     $('agreeBox').classList.add('on');
     clearFieldErrors();
     validate();
-    toast('已填充示例资料，可直接开卡');
-  });
+  }
+  $('btnAutofill').addEventListener('click', function(){ autofill(); toast('已填充示例资料，可直接开卡'); });
 
   function validate(silent){
     var nameOk = form.name.length>=2;
