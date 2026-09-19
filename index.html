@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-<title>MOCE 会员卡 · Alipay Mini-App Demo</title>
-<meta name="description" content="A functional PWA simulation of an Alipay mini-app 申请会员卡 (join membership) flow for MOCE Hardware." />
+<title>MOCE 创物 · Alipay Mini-App Demo</title>
+<meta name="description" content="A functional PWA simulation of an Alipay mini-app 申请会员卡 (join membership) flow for MOCE 创物 — on-demand custom hardware ordering." />
 <link rel="manifest" href="./manifest.json" />
 <meta name="theme-color" content="#1677FF" />
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-title" content="MOCE会员" />
+<meta name="apple-mobile-web-app-title" content="MOCE创物" />
 <style>
   :root{
     --alipay:#1677FF; --alipay-d:#0E5FD8; --ink:#1A1A1A; --sub:#8A94A6;
@@ -108,8 +108,8 @@
   .spacer{height:96px;}
 
   /* sticky bottom cta */
-  .cta-bar{position:absolute;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-    background:linear-gradient(to top,rgba(242,244,247,1) 60%,rgba(242,244,247,0));}
+  .cta-bar{flex:0 0 auto;position:relative;z-index:30;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:var(--bg);box-shadow:0 -6px 16px rgba(15,23,42,.06);}
   .btn{width:100%;height:48px;border:0;border-radius:999px;font-size:16px;font-weight:700;cursor:pointer;transition:.15s;}
   .btn-primary{background:var(--alipay);color:#fff;box-shadow:0 8px 20px rgba(22,119,255,.32);}
   .btn-primary:active{transform:scale(.985);background:var(--alipay-d);}
@@ -117,6 +117,11 @@
   .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line);}
   .btn-ghost:active{background:#F3F5F8;}
   .cta-note{text-align:center;font-size:11px;color:var(--sub);margin-top:8px;}
+
+  /* autofill pill */
+  .autofill{flex:0 0 auto;border:1px solid #FFC79A;background:#FFF3E9;color:#C05A12;font-size:12.5px;font-weight:700;
+    padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;margin-top:2px;}
+  .autofill:active{background:#FFE4CC;}
 
   /* form */
   .field{background:#fff;border-radius:var(--radius);margin:0 16px 12px;padding:2px 16px;}
@@ -234,7 +239,7 @@
   <!-- mini-app navbar -->
   <div class="navbar">
     <button class="nav-back" id="navBack" aria-label="back">‹</button>
-    <div class="title" id="navTitle">MOCE 会员</div>
+    <div class="title" id="navTitle">MOCE 创物</div>
     <div class="capsule">
       <button id="capMore" aria-label="more">•••</button>
       <span class="dot"></span>
@@ -255,57 +260,55 @@
       <div class="brand">
         <div class="logo">M</div>
         <div>
-          <h1>MOCE 五金 <span class="muted" style="font-weight:500;font-size:13px;">Hardware</span></h1>
-          <div class="meta"><span class="pill ok">营业中</span> 南山旗舰店 · 4.9分 · 12家门店</div>
+          <h1>MOCE 创物 <span class="muted" style="font-weight:500;font-size:13px;">Custom Hardware</span></h1>
+          <div class="meta"><span class="pill ok">接单中</span> 在线定制平台 · 4.9分 · 32家合作工厂</div>
         </div>
       </div>
 
       <div class="hero">
         <div class="tier">MOCE MEMBERSHIP</div>
-        <h2>MOCE 会员卡</h2>
-        <p>工具 · 建材 · 五金耗材 — 会员专享价与积分回馈</p>
+        <h2>MOCE 创物会员卡</h2>
+        <p>把你的想法变成实物 — 人人都能下单定制硬件</p>
         <div class="tiers">
-          <span class="on">银卡</span><span>金卡</span><span>黑卡</span><span>工程采购</span>
+          <span class="on">创客</span><span>工坊</span><span>量产</span><span>企业</span>
         </div>
       </div>
 
       <div class="gift">
         <div class="g-ic">🎁</div>
         <div>
-          <div class="g-t">开卡礼：¥50 工具券 + 500 积分</div>
-          <div class="g-d">新会员首次申请即得，可在门店或线上核销</div>
+          <div class="g-t">开卡礼：¥50 首单打样券 + 500 积分</div>
+          <div class="g-d">新会员首单定制即得，可抵扣打样 / 加工费</div>
         </div>
       </div>
 
       <div class="sec-title">会员权益</div>
       <div class="benefits">
-        <div class="benefit"><div class="ic">🪙</div><div class="t">积分回馈</div><div class="d">每消费¥1得1分</div></div>
-        <div class="benefit"><div class="ic">🏷️</div><div class="t">会员折扣</div><div class="d">工具低至9折</div></div>
-        <div class="benefit"><div class="ic">🎂</div><div class="t">生日礼券</div><div class="d">生日月双倍券</div></div>
-        <div class="benefit"><div class="ic">🚚</div><div class="t">免费配送</div><div class="d">满¥299免运费</div></div>
-        <div class="benefit"><div class="ic">♻️</div><div class="t">以旧换新</div><div class="d">旧工具折现金</div></div>
-        <div class="benefit"><div class="ic">🧰</div><div class="t">工程采购</div><div class="d">大宗专属报价</div></div>
+        <div class="benefit"><div class="ic">📐</div><div class="t">免费报价</div><div class="d">上传图纸秒级报价</div></div>
+        <div class="benefit"><div class="ic">🔧</div><div class="t">打样折扣</div><div class="d">首件打样低至5折</div></div>
+        <div class="benefit"><div class="ic">📦</div><div class="t">免起订量</div><div class="d">1 件也能下单</div></div>
+        <div class="benefit"><div class="ic">⚡</div><div class="t">优先排产</div><div class="d">会员订单优先生产</div></div>
+        <div class="benefit"><div class="ic">👷</div><div class="t">专属工程师</div><div class="d">1对1选型与工艺</div></div>
+        <div class="benefit"><div class="ic">🔒</div><div class="t">图纸保密</div><div class="d">默认签署保密协议</div></div>
       </div>
 
-      <div class="sec-title">门店与服务</div>
+      <div class="sec-title">平台与服务</div>
       <div class="card">
-        <div class="listrow"><div class="li">📍</div><div><div class="lt">南山旗舰店</div><div class="ld">深圳市南山区科技园 · 距您 1.2km</div></div><div class="chev">›</div></div>
+        <div class="listrow"><div class="li">🏭</div><div><div class="lt">合作工厂</div><div class="ld">32家认证工厂 · CNC / 3D打印 / 钣金</div></div><div class="chev">›</div></div>
         <div class="listrow"><div class="li">🧾</div><div><div class="lt">电子发票</div><div class="ld">会员消费自动开具增值税发票</div></div><div class="chev">›</div></div>
-        <div class="listrow"><div class="li">💬</div><div><div class="lt">专属客服</div><div class="ld">选型咨询 · 报价 · 售后</div></div><div class="chev">›</div></div>
+        <div class="listrow"><div class="li">💬</div><div><div class="lt">专属工程师</div><div class="ld">工艺评审 · 报价 · 售后</div></div><div class="chev">›</div></div>
       </div>
 
-      <div class="spacer"></div>
-      <div class="cta-bar">
-        <button class="btn btn-primary" id="btnApply">立即申请会员卡</button>
-        <div class="cta-note">已有 <b style="color:var(--alipay)">128,650</b> 位用户加入 MOCE 会员</div>
-      </div>
     </section>
 
     <!-- ===================== FORM ===================== -->
     <section class="view" id="v-form">
-      <div class="pad" style="padding-bottom:4px;">
-        <div style="font-size:19px;font-weight:700;">填写会员资料</div>
-        <div class="muted" style="font-size:12.5px;margin-top:5px;">手机号已通过支付宝授权，请补充以下信息完成开卡</div>
+      <div class="pad" style="padding-bottom:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div>
+          <div style="font-size:19px;font-weight:700;">填写会员资料</div>
+          <div class="muted" style="font-size:12.5px;margin-top:5px;">手机号已通过支付宝授权，请补充以下信息完成开卡</div>
+        </div>
+        <button class="autofill" id="btnAutofill">⚡ 一键填充</button>
       </div>
 
       <div class="field" style="margin-top:14px;">
@@ -324,21 +327,14 @@
         <div class="f-row">
           <label>会员类型</label>
           <div class="seg" id="f-type" style="margin-top:2px;">
-            <button data-v="个人 DIY" class="on">个人 DIY</button>
-            <button data-v="企业采购">企业 / 工程采购</button>
+            <button data-v="个人创客" class="on">个人创客</button>
+            <button data-v="企业采购">企业 · 批量生产</button>
           </div>
         </div>
 
         <div class="f-row">
           <label>生日（选填，领取生日礼券）</label>
           <input id="f-bday" type="date" />
-        </div>
-
-        <div class="f-row">
-          <label>常驻门店</label>
-          <select id="f-store">
-            <option>南山旗舰店</option><option>福田中心店</option><option>宝安建材城店</option><option>线上商城</option>
-          </select>
         </div>
       </div>
 
@@ -347,11 +343,6 @@
         <div>我已阅读并同意 <a id="lnkTerms" href="#">《MOCE 会员服务协议》</a> 与 <a href="#" id="lnkPriv">《隐私政策》</a>，并授权 MOCE 使用我的手机号创建会员账户。</div>
       </div>
 
-      <div class="spacer"></div>
-      <div class="cta-bar">
-        <button class="btn btn-primary" id="btnSubmit" disabled>立即开卡</button>
-        <div class="cta-note">开卡即享 ¥50 工具券 + 500 积分</div>
-      </div>
     </section>
 
     <!-- ===================== SUCCESS / CARD ===================== -->
@@ -365,8 +356,8 @@
       <div class="mcard">
         <div class="mh">
           <div class="logo">M</div>
-          <div class="nm">MOCE 五金会员卡</div>
-          <div class="tier" id="cTier">银卡会员</div>
+          <div class="nm">MOCE 创物会员卡</div>
+          <div class="tier" id="cTier">创客会员</div>
         </div>
         <div class="who">
           <div class="n" id="cName">—</div>
@@ -375,7 +366,7 @@
         <div class="qrwrap">
           <canvas id="qr" width="96" height="96"></canvas>
           <div class="qrtxt">
-            <b>出示会员码</b><br/>门店收银台扫码享会员价<br/><span class="muted" id="cBarcode">MOCE · —</span>
+            <b>出示会员码</b><br/>下单定制时扫码享会员价<br/><span class="muted" id="cBarcode">MOCE · —</span>
             <canvas id="bc" width="150" height="34" style="margin-top:8px;"></canvas>
           </div>
         </div>
@@ -383,21 +374,21 @@
 
       <div class="stat-grid">
         <div class="stat"><div class="v orange" id="sPoints">500</div><div class="l">可用积分</div></div>
-        <div class="stat"><div class="v">¥50</div><div class="l">工具券</div></div>
-        <div class="stat"><div class="v">9折</div><div class="l">会员折扣</div></div>
+        <div class="stat"><div class="v">¥50</div><div class="l">打样券</div></div>
+        <div class="stat"><div class="v">5折</div><div class="l">打样折扣</div></div>
       </div>
 
       <div class="coupon">
         <div class="amt"><div><div class="big">¥50</div><div class="sm">满¥199可用</div></div></div>
         <div class="info">
-          <div class="t">开卡礼 · 工具品类券</div>
-          <div class="d">有效期至 <span id="cpExp">—</span> · 门店/线上通用</div>
+          <div class="t">开卡礼 · 首单打样券</div>
+          <div class="d">有效期至 <span id="cpExp">—</span> · 打样/加工费可抵</div>
           <button class="use" id="btnUse">去使用</button>
         </div>
       </div>
 
       <div class="prog">
-        <div class="ph"><span>银卡会员</span><span class="muted">再消费 ¥2,000 升级金卡</span></div>
+        <div class="ph"><span>创客会员</span><span class="muted">再下 2 单升级工坊会员</span></div>
         <div class="bar"><i></i></div>
       </div>
 
@@ -412,12 +403,12 @@
     <section class="view" id="v-benefits">
       <div class="pad"><div style="font-size:19px;font-weight:700;">会员权益详情</div></div>
       <div class="card">
-        <div class="listrow"><div class="li">🪙</div><div><div class="lt">积分回馈</div><div class="ld">每消费 ¥1 累积 1 积分，1000 积分抵 ¥50</div></div></div>
-        <div class="listrow"><div class="li">🏷️</div><div><div class="lt">会员折扣</div><div class="ld">手动工具 9 折、电动工具 95 折</div></div></div>
-        <div class="listrow"><div class="li">🎂</div><div><div class="lt">生日礼券</div><div class="ld">生日当月赠送双倍积分与专属券</div></div></div>
-        <div class="listrow"><div class="li">🚚</div><div><div class="lt">免费配送</div><div class="ld">订单满 ¥299 免运费（含建材大件）</div></div></div>
-        <div class="listrow"><div class="li">♻️</div><div><div class="lt">以旧换新</div><div class="ld">旧电动工具回收抵扣新机</div></div></div>
-        <div class="listrow"><div class="li">🧰</div><div><div class="lt">工程采购</div><div class="ld">大宗订单专属报价 + 账期支持</div></div></div>
+        <div class="listrow"><div class="li">📐</div><div><div class="lt">免费报价</div><div class="ld">上传图纸秒级报价，会员免报价费</div></div></div>
+        <div class="listrow"><div class="li">🔧</div><div><div class="lt">打样折扣</div><div class="ld">首件打样低至 5 折</div></div></div>
+        <div class="listrow"><div class="li">📦</div><div><div class="lt">免起订量</div><div class="ld">1 件起做，无 MOQ 门槛</div></div></div>
+        <div class="listrow"><div class="li">⚡</div><div><div class="lt">优先排产</div><div class="ld">会员订单进入优先生产队列</div></div></div>
+        <div class="listrow"><div class="li">👷</div><div><div class="lt">专属工程师</div><div class="ld">1对1 选型、工艺与公差评审</div></div></div>
+        <div class="listrow"><div class="li">🔒</div><div><div class="lt">图纸保密</div><div class="ld">默认签署 NDA，图纸加密存储</div></div></div>
       </div>
       <div class="spacer" style="height:24px;"></div>
     </section>
@@ -427,9 +418,9 @@
       <div class="pad terms">
         <div style="font-size:19px;font-weight:700;color:var(--ink);">MOCE 会员服务协议</div>
         <h4>一、会员资格</h4>
-        <p>凡通过支付宝小程序授权手机号并填写真实信息者，均可免费申请成为 MOCE 会员。会员卡仅限本人使用，不得转借、买卖。</p>
+        <p>凡通过支付宝小程序授权手机号并填写真实信息者，均可免费申请成为 MOCE 创物会员。会员卡仅限本人使用，不得转借、买卖。</p>
         <h4>二、积分与权益</h4>
-        <p>会员每消费 ¥1 累积 1 积分，积分可在门店或线上商城兑换商品及抵扣现金。生日礼券、免费配送等权益以门店公示为准，MOCE 保留调整权益的权利。</p>
+        <p>会员每消费 ¥1 累积 1 积分，积分可抵扣打样与加工费用。免费报价、打样折扣、免起订量、优先排产等权益以平台公示为准，MOCE 保留调整权益的权利。</p>
         <h4>三、隐私保护</h4>
         <p>本 Demo 为界面模拟，不会上传或存储任何真实个人信息；所有数据仅保存在您本机浏览器 localStorage 中。</p>
         <h4>四、说明</h4>
@@ -440,6 +431,17 @@
 
   </div><!-- /body -->
 
+  <!-- pinned bottom CTAs: children of .phone (not the scroll container) so they
+       stay glued to the phone bottom and can never cover form content -->
+  <div class="cta-bar" id="ctaLanding">
+    <button class="btn btn-primary" id="btnApply">立即申请会员卡</button>
+    <div class="cta-note">已交付 <b style="color:var(--alipay)">128,650</b> 件定制订单</div>
+  </div>
+  <div class="cta-bar" id="ctaForm" style="display:none;">
+    <button class="btn btn-primary" id="btnSubmit" disabled>立即开卡</button>
+    <div class="cta-note">开卡即享 ¥50 首单打样券 + 500 积分</div>
+  </div>
+
   <!-- phone auth bottom sheet -->
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="authSheet" role="dialog" aria-modal="true">
@@ -447,7 +449,7 @@
     <div class="auth-head">
       <div class="logo">M</div>
       <div>
-        <div class="t">MOCE 五金 申请</div>
+        <div class="t">MOCE 创物 申请</div>
         <div class="s">获取并验证你的支付宝绑定手机号</div>
       </div>
     </div>
@@ -479,7 +481,7 @@
   "use strict";
   var $ = function(id){ return document.getElementById(id); };
   var views = {landing:'v-landing', form:'v-form', success:'v-success', benefits:'v-benefits', terms:'v-terms'};
-  var titles = {landing:'MOCE 会员', form:'申请会员卡', success:'我的会员卡', benefits:'会员权益', terms:'会员服务协议'};
+  var titles = {landing:'MOCE 创物', form:'申请会员卡', success:'我的会员卡', benefits:'会员权益', terms:'会员服务协议'};
   var order = ['landing','form','success'];
   var hist = ['landing'];
   var current = 'landing';
@@ -489,7 +491,7 @@
     set:function(m){ try{ localStorage.setItem(this.key, JSON.stringify(m)); }catch(e){} },
     clear:function(){ try{ localStorage.removeItem(this.key); }catch(e){} }
   };
-  var form = { name:'', phone:'', type:'个人 DIY', bday:'', store:'南山旗舰店', agreed:false };
+  var form = { name:'', phone:'', type:'个人创客', bday:'', agreed:false };
   var BOUND_PHONE = '13800008000';
 
   // ---- clock ----
@@ -503,9 +505,11 @@
   function show(name, push){
     Object.keys(views).forEach(function(k){ $(views[k]).classList.toggle('active', k===name); });
     current = name;
-    $('navTitle').textContent = titles[name] || 'MOCE 会员';
+    $('navTitle').textContent = titles[name] || 'MOCE 创物';
     $('body').scrollTop = 0;
     $('navBack').style.visibility = (name==='landing') ? 'hidden' : 'visible';
+    $('ctaLanding').style.display = (name==='landing') ? '' : 'none';
+    $('ctaForm').style.display = (name==='form') ? '' : 'none';
     if(push!==false){ if(hist[hist.length-1]!==name) hist.push(name); }
   }
   function back(){
@@ -530,7 +534,7 @@
     $('menu').classList.remove('open');
     if(a==='reset'){ store.clear(); resetForm(); show('landing'); hist=['landing']; toast('演示已重置'); }
     if(a==='terms'){ show('terms'); }
-    if(a==='about'){ toast('MOCE 会员卡 · Alipay 小程序流程模拟 PWA'); }
+    if(a==='about'){ toast('MOCE 创物会员卡 · Alipay 小程序流程模拟 PWA'); }
   });
 
   // ---- landing -> auth sheet ----
@@ -561,10 +565,30 @@
   $('f-name').addEventListener('input', function(){ form.name=this.value.trim(); validate(); });
   $('f-phone').addEventListener('input', function(){ this.value=this.value.replace(/\D/g,'').slice(0,11); form.phone=this.value; validate(); });
   $('f-bday').addEventListener('change', function(){ form.bday=this.value; });
-  $('f-store').addEventListener('change', function(){ form.store=this.value; });
   $('agreeBox').addEventListener('click', function(){ form.agreed=!form.agreed; this.classList.toggle('on', form.agreed); validate(); });
   $('lnkTerms').addEventListener('click', function(e){ e.preventDefault(); show('terms'); });
   $('lnkPriv').addEventListener('click', function(e){ e.preventDefault(); show('terms'); });
+
+  function clearFieldErrors(){
+    ['r-name','r-phone'].forEach(function(id){ $(id).classList.remove('invalid'); });
+    ['e-name','e-phone'].forEach(function(id){ $(id).classList.remove('show'); });
+  }
+  function setSeg(index){
+    Array.prototype.forEach.call($('f-type').children, function(c,i){ c.classList.toggle('on', i===index); });
+  }
+
+  // ---- one-tap autofill (demo convenience) ----
+  $('btnAutofill').addEventListener('click', function(){
+    form.name='张伟'; form.phone=BOUND_PHONE; form.type='个人创客';
+    form.bday='1992-08-18'; form.agreed=true;
+    $('f-name').value='张伟'; $('f-phone').value=BOUND_PHONE;
+    $('f-bday').value='1992-08-18';
+    setSeg(0);
+    $('agreeBox').classList.add('on');
+    clearFieldErrors();
+    validate();
+    toast('已填充示例资料，可直接开卡');
+  });
 
   function validate(silent){
     var nameOk = form.name.length>=2;
@@ -599,8 +623,8 @@
     var r=Math.random;
     var no='MOCE-'+String(new Date().getFullYear())+'-'+(''+Math.floor(100000+r()*899999));
     var m={
-      name:form.name, phone:form.phone, type:form.type, bday:form.bday, store:form.store,
-      no:no, tier:'银卡会员', points:500, coupon:'¥50', issued:new Date().toISOString()
+      name:form.name, phone:form.phone, type:form.type, bday:form.bday,
+      no:no, tier:'创客会员', points:500, coupon:'¥50', issued:new Date().toISOString()
     };
     store.set(m);
     return m;
@@ -616,7 +640,7 @@
     $('sPoints').textContent = m.points;
     $('cpExp').textContent = fmtExp();
     $('cBarcode').textContent = 'MOCE · ' + m.no.replace('MOCE-','');
-    $('succSub').textContent = '欢迎加入 MOCE 会员，'+m.name+'！开卡礼已发放';
+    $('succSub').textContent = '欢迎加入 MOCE 创物会员，'+m.name+'！开卡礼已发放';
     drawQR($('qr'), m.no);
     drawBarcode($('bc'), m.no);
   }
@@ -650,16 +674,15 @@
   // ---- success actions ----
   $('btnAddCard').addEventListener('click', function(){ toast('（模拟）已添加到支付宝卡包 · my.addCardAuth'); });
   $('btnBenefits').addEventListener('click', function(){ show('benefits'); });
-  $('btnUse').addEventListener('click', function(){ toast('¥50 工具券已放入卡包，结算时自动抵扣'); });
+  $('btnUse').addEventListener('click', function(){ toast('¥50 打样券已放入卡包，结算时自动抵扣'); });
 
   // ---- reset ----
   function resetForm(){
-    form={ name:'', phone:'', type:'个人 DIY', bday:'', store:'南山旗舰店', agreed:false };
-    $('f-name').value=''; $('f-phone').value=''; $('f-bday').value=''; $('f-store').selectedIndex=0;
+    form={ name:'', phone:'', type:'个人创客', bday:'', agreed:false };
+    $('f-name').value=''; $('f-phone').value=''; $('f-bday').value='';
     $('agreeBox').classList.remove('on');
-    Array.prototype.forEach.call($('f-type').children,function(c,i){ c.classList.toggle('on', i===0); });
-    ['r-name','r-phone'].forEach(function(id){ $(id).classList.remove('invalid'); });
-    ['e-name','e-phone'].forEach(function(id){ $(id).classList.remove('show'); });
+    setSeg(0);
+    clearFieldErrors();
     $('btnSubmit').disabled=true;
   }
 
@@ -669,13 +692,6 @@
     // prefill nothing on landing, but offer quick access
     $('btnApply').textContent = '查看我的会员卡';
     $('btnApply').onclick = function(){ renderCard(existing); show('success'); };
-  }
-
-  // ---- PWA ----
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', function(){
-      navigator.serviceWorker.register('./sw.js').catch(function(){});
-    });
   }
 })();
 </script>

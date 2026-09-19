@@ -1,9 +1,11 @@
 # MOCE 会员卡 — Alipay Mini-App Membership Demo (PWA)
 
 A **functional, installable Progressive Web App** that simulates the Alipay mini-program
-「申请会员卡」(join-membership) flow for **MOCE 五金**, a physical hardware store.
-Not a static mockup: the phone-auth sheet gates entry, the form validates, and a member
-record is issued and persisted in `localStorage`.
+「申请会员卡」(join-membership) flow for **MOCE 创物** — an on-demand **custom-hardware**
+ordering platform ("vibe building": letting more people place orders for custom hardware),
+not a retail hardware store. Not a static mockup: the phone-auth sheet gates entry, the form
+validates (with a one-tap ⚡ autofill for demos), and a member record is issued and persisted
+in `localStorage`.
 
 ## Live
 GitHub Pages: <https://calchulus.github.io/moce-membership/>

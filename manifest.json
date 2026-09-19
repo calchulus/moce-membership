@@ -1,7 +1,7 @@
 {
-  "name": "MOCE 会员卡 · Alipay Mini-App Demo",
-  "short_name": "MOCE会员",
-  "description": "A functional PWA simulation of an Alipay mini-app 申请会员卡 (join membership) flow for MOCE Hardware.",
+  "name": "MOCE 创物 · 定制硬件会员 Demo",
+  "short_name": "MOCE创物",
+  "description": "A functional PWA simulation of an Alipay mini-app 申请会员卡 (join membership) flow for MOCE 创物 — on-demand custom hardware ordering.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

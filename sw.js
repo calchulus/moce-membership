@@ -1,5 +1,5 @@
 /* MOCE membership demo — simple cache-first service worker (app shell). */
-const CACHE = 'moce-pwa-v1';
+const CACHE = 'moce-pwa-v2';
 const ASSETS = [
   './',
   './index.html',
