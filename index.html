@@ -693,6 +693,13 @@
     $('btnApply').textContent = '查看我的会员卡';
     $('btnApply').onclick = function(){ renderCard(existing); show('success'); };
   }
+
+  // ---- PWA ----
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
 })();
 </script>
 </body>
